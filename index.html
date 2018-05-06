@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset = "utf-8">
+  <meta name = "viewport" content = "width = device-width, initial-scale = 1">
+  <title>FGO Card Generator</title>
+  <style type = "text/css">
+    body {
+      background: black;
+    }
+    #main-container {
+      background: linear-gradient(45deg, #F2F2F2 25%, #F5F5F5 0, #F5F5F5 50%, #F2F2F2 0, #F2F2F2 75%, #F5F5F5 0);
+      background-size: 100px 100px;
+      border: 1px solid #E0E0E0;
+      position: relative;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      margin: 0 auto;
+    }
+    #Canvas-container {
+      position: relative;
+      max-width: 500px;
+      width: 100%;
+      margin: 0 auto;
+      margin-top: 10px;
+    }
+    #Canvas-container div {
+      color: white;
+      text-align: center;
+    }
+    img { 
+      display: block; 
+      max-width: 500px;
+      margin: 0px auto;
+      padding: 10px 0;
+    }
+  </style>
+  <script type = "text/javascript">
+    function get_pic(id)
+    {
+      let reader;
+      if (window.FileReader) {
+        reader = new FileReader();
+      } else {
+        alert("Your device doesn't support uploading images.");
+      }
+      
+      const file = document.getElementById('file').files[0];
+      const imageType = /^image\//g;
+      
+      if (!imageType.test(file.type)) 
+      {
+        alert("Please upload a picture!");
+        return;
+      } 
+      
+      reader.onload = function(e) 
+      {
+        const canvas = document.getElementById(id);
+        let img = document.getElementById('original');
+        img.crossOrigin = '';
+        img.onload = function () {
+          let w = img.width;
+          let h = img.height;
+          let y = Math.floor(w / 10);
+          let l = w - y;
+
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, w, h);
+          let imgData = ctx.getImageData(y, 0, l, h);
+          let data = imgData.data;
+          for (let i = 0; i < data.length; i += 4) {
+            let rnd = (l - Math.floor(i / 4) % l) / l;
+            if (Math.random() > rnd) data[i + 3] = 0;
+          }
+          ctx.putImageData(imgData, y, 0);
+          dataURL = canvas.toDataURL();
+          document.getElementById('pic_show').src = dataURL;
+          document.getElementById('Canvas-container').style.display = "block";
+        }
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  </script>
+</head>
+<body onresize = "resize()">
+  <div id = "main-container" >
+    Please upload the photo<br><br>
+    <input type = "file" name = "file" id="file">
+    <button onclick = "get_pic('myCanvas')">Generate!</button>
+  </div>
+  <div id = "Canvas-container" style="display: none">
+    <canvas id = "myCanvas" width = "500" height = "850" style = "border:1px solid #c3c3c3" hidden = "hidden">
+      Your browser doesn't support Canvas, please use a more modern browser!
+    </canvas>
+    <div>Original</div>
+    <img id = "original">
+    <div>Thanoshii'd</div>
+    <img id = "pic_show">
+  </div>
+ </body>
+ </html>
